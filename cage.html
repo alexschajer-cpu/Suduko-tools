@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0f0f0f" id="theme-meta">
+<title>Cage Candidates</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f0f; --surface: #181818; --surface2: #222222;
+    --border: #2e2e2e; --border-bright: #444;
+    --text: #e8e4dc; --text-dim: #6a6660; --text-mid: #9a9590;
+    --accent: #d4a84b; --green: #5a9e6f; --green-dim: rgba(90,158,111,0.15);
+    --red: #b85450; --red-dim: rgba(184,84,80,0.15);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-top: env(safe-area-inset-top, 0px);
+  }
+  :root.light {
+    --bg: #f0ede6; --surface: #faf8f4; --surface2: #f0ede6;
+    --border: #dedad2; --border-bright: #c4bfb5;
+    --text: #1a1916; --text-dim: #9a9588; --text-mid: #6a6660;
+    --accent: #b8860b; --green: #2e7d4f; --green-dim: rgba(46,125,79,0.12);
+    --red: #a33430; --red-dim: rgba(163,52,48,0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent;
+      transition: background-color 0.2s, border-color 0.2s, color 0.2s; }
+  html, body { height: 100%; overscroll-behavior: none; }
+  body {
+    font-family: 'JetBrains Mono', monospace; background: var(--bg); color: var(--text);
+    min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+    padding: 16px 16px calc(24px + var(--safe-bottom));
+  }
+  .app { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 12px; }
+
+  /* NAV BAR */
+  .nav-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-bottom: 4px;
+  }
+  .nav-left { display: flex; align-items: center; gap: 10px; }
+  .back-btn {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 20px;
+    padding: 5px 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+    color: var(--text-mid); cursor: pointer; display: flex; align-items: center; gap: 5px;
+    text-decoration: none;
+  }
+  .back-btn:active { opacity: 0.7; }
+  .page-title { font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-dim); }
+  .theme-toggle {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 20px;
+    padding: 5px 10px; cursor: pointer; font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem; color: var(--text-mid); display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+  }
+  .theme-toggle:active { opacity: 0.7; }
+
+  /* HEADING */
+  .heading { font-size: 1.25rem; font-weight: 700; color: var(--text); letter-spacing: -0.01em; }
+  .heading span { color: var(--accent); }
+  .subheading { font-size: 0.6rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-dim); }
+  .heading-row { display: flex; align-items: baseline; gap: 10px; }
+
+  /* CARD */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  .field-row { display: flex; gap: 10px; margin-bottom: 18px; }
+  .field { display: flex; flex-direction: column; gap: 5px; flex: 1; }
+  .field.narrow { flex: 0 0 120px; }
+  label { font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-dim); padding-left: 2px; }
+  .input-with-reset { display: flex; align-items: stretch; }
+  .input-with-reset input { border-radius: 6px 0 0 6px; flex: 1; min-width: 0; }
+  .reset-btn {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; width: 42px;
+    background: var(--surface2); border: 1px solid var(--border); border-left: none;
+    border-radius: 0 6px 6px 0; color: var(--text-dim); cursor: pointer;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .reset-btn:active { background: var(--border); color: var(--text); }
+  input[type=number] {
+    font-family: 'JetBrains Mono', monospace; font-size: 1.6rem; font-weight: 700;
+    width: 100%; padding: 12px 14px; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--text); border-radius: 6px; outline: none;
+    -moz-appearance: textfield;
+  }
+  input[type=number]::-webkit-outer-spin-button,
+  input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+  input[type=number]:focus { border-color: var(--accent); }
+  input[type=number].invalid { border-color: var(--red) !important; }
+  .digit-section-label {
+    font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--text-dim); margin-bottom: 8px; padding-left: 2px;
+  }
+  .digit-row { display: grid; grid-template-columns: repeat(9, 1fr); gap: 5px; margin-bottom: 10px; }
+  .digit-btn {
+    aspect-ratio: 1; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--surface2); color: var(--text-mid); font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(0.85rem, 3.5vw, 1.05rem); font-weight: 500; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; padding: 0;
+    min-height: 44px; -webkit-user-select: none; user-select: none;
+  }
+  .digit-btn:active { transform: scale(0.91); }
+  .digit-btn.must { background: var(--green-dim); border-color: var(--green); color: var(--green); }
+  .digit-btn.cannot { background: var(--red-dim); border-color: var(--red); color: var(--red); text-decoration: line-through; }
+  .digit-legend { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .legend-pill {
+    font-size: 0.58rem; letter-spacing: 0.04em; padding: 3px 8px; border-radius: 20px;
+    border: 1px solid; display: flex; align-items: center; gap: 4px;
+  }
+  .legend-pill.green { border-color: var(--green); color: var(--green); background: var(--green-dim); }
+  .legend-pill.red { border-color: var(--red); color: var(--red); background: var(--red-dim); }
+  .legend-pill.neutral { border-color: var(--border-bright); color: var(--text-dim); }
+  .reset-link {
+    font-size: 0.62rem; color: var(--text-dim); cursor: pointer; text-decoration: underline;
+    text-underline-offset: 3px; padding: 4px 2px; display: inline-block;
+  }
+  .reset-link:active { color: var(--text-mid); }
+
+  /* RESULTS */
+  .results-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .results-header {
+    padding: 11px 16px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .results-title { font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-dim); }
+  .results-count { font-size: 0.72rem; color: var(--accent); font-weight: 500; }
+  .results-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+  .no-results { font-size: 0.78rem; color: var(--text-dim); padding: 12px 0 4px; text-align: center; line-height: 1.6; }
+  .combo-row { display: flex; align-items: center; animation: fadeIn 0.12s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: none; } }
+  .combo-digits { display: flex; gap: 4px; flex-wrap: wrap; }
+  .combo-chip {
+    width: 34px; height: 34px; border-radius: 4px; display: flex; align-items: center;
+    justify-content: center; font-size: 1rem; font-weight: 500;
+    border: 1px solid var(--border); color: var(--text-mid); background: var(--surface2);
+  }
+  .combo-chip.must-digit { background: var(--green-dim); border-color: var(--green); color: var(--green); }
+  .unique-bar { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .unique-bar-label { font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px; }
+  .unique-digits { display: flex; gap: 4px; flex-wrap: wrap; }
+  .unique-chip {
+    width: 34px; height: 34px; border-radius: 4px; display: flex; align-items: center;
+    justify-content: center; font-size: 0.9rem; font-weight: 500; border: 1px solid;
+  }
+  .unique-chip.always { background: var(--green-dim); border-color: var(--green); color: var(--green); }
+  .unique-chip.possible { background: var(--surface2); border-color: var(--border); color: var(--text-mid); }
+  .unique-chip.never { background: transparent; border-color: var(--border); color: #3a3a3a; text-decoration: line-through; }
+  .hint {
+    font-size: 0.68rem; color: var(--text-dim); line-height: 1.7; margin-top: 14px;
+    padding: 12px 14px; border: 1px solid var(--border); border-radius: 4px; border-left: 3px solid var(--accent);
+  }
+  .hint strong { color: var(--accent); font-weight: 500; }
+  .error-msg { font-size: 0.75rem; color: var(--red); padding: 12px 0 4px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="nav-bar">
+    <div class="nav-left">
+      <a href="index.html" class="back-btn">‹ Back</a>
+      <span class="page-title">Killer Sudoku</span>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()">
+      <span id="theme-icon">☀️</span>
+      <span id="theme-label">Light</span>
+    </button>
+  </div>
+
+  <div class="heading-row">
+    <div class="heading">Cage <span>Candidates</span></div>
+  </div>
+
+  <div class="card">
+    <div class="field-row">
+      <div class="field">
+        <label>Cage Total</label>
+        <div class="input-with-reset">
+          <input type="number" id="total" min="1" max="45" placeholder="15"
+                 inputmode="numeric" pattern="[0-9]*" oninput="calculate()">
+          <button class="reset-btn" onclick="resetField('total')" title="Clear">&#x2715;</button>
+        </div>
+      </div>
+      <div class="field narrow">
+        <label>Cells</label>
+        <div class="input-with-reset">
+          <input type="number" id="cells" min="1" max="9" placeholder="2"
+                 inputmode="numeric" pattern="[0-9]*" oninput="calculate()">
+          <button class="reset-btn" onclick="resetField('cells')" title="Clear">&#x2715;</button>
+        </div>
+      </div>
+    </div>
+    <div class="digit-section-label">Digit filters</div>
+    <div class="digit-row" id="digit-btns"></div>
+    <div class="digit-legend">
+      <span class="legend-pill green">&#10003; must include</span>
+      <span class="legend-pill red">&#x2715; cannot include</span>
+      <span class="legend-pill neutral">tap to cycle</span>
+    </div>
+    <span class="reset-link" onclick="resetDigits()">clear all digit filters</span>
+  </div>
+
+  <div class="results-card">
+    <div class="results-header">
+      <span class="results-title">Combinations</span>
+      <span class="results-count" id="results-count"></span>
+    </div>
+    <div class="results-body" id="results-body">
+      <div class="no-results">Enter a total and cell count above.</div>
+    </div>
+  </div>
+
+</div>
+<script>
+const digitState = Array(10).fill(0);
+let isLight = false;
+
+function toggleTheme() {
+  isLight = !isLight;
+  document.documentElement.classList.toggle('light', isLight);
+  document.getElementById('theme-icon').textContent = isLight ? '🌙' : '☀️';
+  document.getElementById('theme-label').textContent = isLight ? 'Dark' : 'Light';
+  document.getElementById('theme-meta').setAttribute('content', isLight ? '#f0ede6' : '#0f0f0f');
+  try { localStorage.setItem('sk-theme', isLight ? 'light' : 'dark'); } catch(e) {}
+}
+try { if (localStorage.getItem('sk-theme') === 'light') toggleTheme(); } catch(e) {}
+
+function initDigitBtns() {
+  const row = document.getElementById('digit-btns');
+  for (let d = 1; d <= 9; d++) {
+    const btn = document.createElement('button');
+    btn.className = 'digit-btn'; btn.textContent = d; btn.dataset.d = d;
+    btn.addEventListener('click', () => { digitState[d] = (digitState[d]+1)%3; updateDigitBtn(d); calculate(); });
+    row.appendChild(btn);
+  }
+}
+function updateDigitBtn(d) {
+  const btn = document.querySelector(`.digit-btn[data-d="${d}"]`);
+  btn.classList.remove('must','cannot');
+  if (digitState[d]===1) btn.classList.add('must');
+  else if (digitState[d]===2) btn.classList.add('cannot');
+}
+function resetDigits() { for(let d=1;d<=9;d++){digitState[d]=0;updateDigitBtn(d);} calculate(); }
+function resetField(id) { const el=document.getElementById(id); el.value=''; el.classList.remove('invalid'); calculate(); }
+
+function calculate() {
+  const totalEl=document.getElementById('total'), cellsEl=document.getElementById('cells');
+  const total=parseInt(totalEl.value), cells=parseInt(cellsEl.value);
+  const body=document.getElementById('results-body'), countEl=document.getElementById('results-count');
+  totalEl.classList.remove('invalid'); cellsEl.classList.remove('invalid');
+  if(!total||!cells){body.innerHTML='<div class="no-results">Enter a total and cell count above.</div>';countEl.textContent='';return;}
+  if(cells<1||cells>9){cellsEl.classList.add('invalid');body.innerHTML='<div class="error-msg">Cells must be between 1 and 9.</div>';countEl.textContent='';return;}
+  const minSum=cells*(cells+1)/2, maxSum=cells*(19-cells)/2;
+  if(total<minSum||total>maxSum){totalEl.classList.add('invalid');body.innerHTML=`<div class="error-msg">No valid combinations: ${total} is out of range for ${cells} cell${cells>1?'s':''} (${minSum}&ndash;${maxSum}).</div>`;countEl.textContent='0';return;}
+  const mustHave=[], cannotHave=new Set();
+  for(let d=1;d<=9;d++){if(digitState[d]===1)mustHave.push(d);if(digitState[d]===2)cannotHave.add(d);}
+  for(const d of mustHave){if(cannotHave.has(d)){body.innerHTML=`<div class="error-msg">Conflict: ${d} is marked both must and cannot.</div>`;countEl.textContent='!';return;}}
+  const combos=[];
+  function gen(start,chosen,sum){
+    if(chosen.length===cells){if(sum===total)combos.push([...chosen]);return;}
+    const remaining=cells-chosen.length;
+    for(let d=start;d<=9;d++){
+      if(cannotHave.has(d))continue;
+      const newSum=sum+d, left=remaining-1;
+      if(left>0){const minAdd=(d+1+d+left)*left/2,maxAdd=(9+9-left+1)*left/2;if(newSum+minAdd>total)break;if(newSum+maxAdd<total)continue;}
+      gen(d+1,[...chosen,d],newSum);
+    }
+  }
+  gen(1,[],0);
+  const filtered=mustHave.length===0?combos:combos.filter(c=>mustHave.every(d=>c.includes(d)));
+  countEl.textContent=filtered.length===0?'none':`${filtered.length} combo${filtered.length>1?'s':''}`;
+  if(filtered.length===0){body.innerHTML='<div class="no-results">No combinations match your constraints.</div>';return;}
+  const alwaysPresent=[],sometimesPresent=[],neverPresent=[];
+  for(let d=1;d<=9;d++){if(cannotHave.has(d)){neverPresent.push(d);continue;}const inAll=filtered.every(c=>c.includes(d)),inSome=filtered.some(c=>c.includes(d));if(inAll)alwaysPresent.push(d);else if(inSome)sometimesPresent.push(d);else neverPresent.push(d);}
+  let html='';
+  filtered.forEach(combo=>{const chips=combo.map(d=>`<div class="${alwaysPresent.includes(d)?'combo-chip must-digit':'combo-chip'}">${d}</div>`).join('');html+=`<div class="combo-row"><div class="combo-digits">${chips}</div></div>`;});
+  html+=`<div class="unique-bar"><div class="unique-bar-label">Digit summary</div><div class="unique-digits">`;
+  for(let d=1;d<=9;d++){let cls=alwaysPresent.includes(d)?'unique-chip always':sometimesPresent.includes(d)?'unique-chip possible':'unique-chip never';html+=`<div class="${cls}">${d}</div>`;}
+  html+=`</div></div>`;
+  if(alwaysPresent.length>0)html+=`<div class="hint"><strong>Required:</strong> ${alwaysPresent.join(', ')} appear in every valid combination.</div>`;
+  body.innerHTML=html;
+}
+
+initDigitBtns();
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
